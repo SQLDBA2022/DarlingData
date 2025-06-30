@@ -37,6 +37,14 @@ For support, head over to GitHub:
 https://code.erikdarling.com
 
 */
+/*##############################################################################################
+# Author Date       Description / Change                                                                                                                                                              
+# ------ ---------- --------------------------------------------------- 
+# =ksm=   2025/06/30  Update Datatype sizes around the #waits table as well as downstream code                                                                                                                                                                            
+#
+#
+################################################################################################*/
+
 
 IF OBJECT_ID(N'dbo.sp_PerfCheck', N'P') IS NULL
 BEGIN
@@ -569,9 +577,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         wait_time_hours AS (wait_time_ms / 1000.0 / 60.0 / 60.0),
         waiting_tasks_count bigint NOT NULL,
         avg_wait_ms AS (wait_time_ms / NULLIF(waiting_tasks_count, 0)),
-        percentage decimal(5, 2) NOT NULL,
+        percentage decimal(10, 2) NOT NULL,    --ksm changed to 10 as 5 not big enough for clients data
         signal_wait_time_ms bigint NOT NULL,
-        wait_time_percent_of_uptime decimal(6, 2) NULL,
+        wait_time_percent_of_uptime decimal(10, 2) NULL,   --ksm changed to 10 as 5 not big enough for clients data
         category nvarchar(50) NOT NULL
     );
 
@@ -1840,7 +1848,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             percentage =
                 CONVERT
                 (
-                    decimal(5,2),
+                    decimal(10,2),   --ksm to support larger datatype size
                     dows.wait_time_ms * 100.0 / @total_waits
                 ),
             category =
@@ -1963,12 +1971,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 N'Wait type: ' +
                 ws.wait_type +
                 N' represents ' +
-                CONVERT(nvarchar(10), CONVERT(decimal(10, 2), ws.wait_time_percent_of_uptime)) +
+                CONVERT(nvarchar(25), CONVERT(decimal(10, 2), ws.wait_time_percent_of_uptime)) +     --ksm to support larger datatype size
                 N'% of server uptime (' +
-                CONVERT(nvarchar(20), CONVERT(decimal(10, 2), ws.wait_time_minutes)) +
+                CONVERT(nvarchar(25), CONVERT(decimal(10, 2), ws.wait_time_minutes)) +                 --ksm to support larger datatype size
                 N' minutes). ' +
                 N'Average wait: ' +
-                CONVERT(nvarchar(10), CONVERT(decimal(10, 2), ws.avg_wait_ms)) +
+                CONVERT(nvarchar(25), CONVERT(decimal(10, 2), ws.avg_wait_ms)) +                          --ksm to support larger datatype size
                 N' ms per wait. ' +
                 N'Description: ' +
                 ws.description,
